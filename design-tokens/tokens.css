@@ -1,0 +1,158 @@
+/**
+ * Fusion design tokens — the brand system (docs/plans/fusion-theme.md, DESIGN.md).
+ *
+ * The ONLY place colour, radius, shadow and font values live; components use
+ * `var(--fx-…)` (or the Tailwind utilities mapped to them), and CI fails on a
+ * raw hex anywhere else.
+ *
+ * Three theme states: light on :root; dark under prefers-color-scheme when no
+ * explicit choice overrides it (:root:not([data-theme="light"])); and dark
+ * again under :root[data-theme="dark"] so an explicit choice wins over the OS.
+ * `data-theme` is set before first paint by the boot script in each app's root
+ * layout; "system" leaves it unset.
+ *
+ * Contrast notes (measured, WCAG 2.x):
+ * - White text never sits on --fx-accent (3.06:1): solid buttons use --fx-button.
+ * - Accent-coloured TEXT uses --fx-accent-strong (≥ 5.0:1 light on bg and card, 7.07:1 dark).
+ * - --fx-faint is for icons, guides and large text only (3.4–3.9:1 in light).
+ * - Pill text uses the *-ink tokens; the plain status colour is for dots and borders.
+ * - Control borders use --fx-control-border (≥ 3:1); --fx-line-2 is for dividers.
+ */
+:root {
+  color-scheme: light dark;
+
+  --fx-bg: #f3f0ef;
+  --fx-card: #ffffff;
+  --fx-inset: #fefcf8;
+  --fx-cream: #fcf3e2;
+
+  --fx-ink: #15100e;
+  --fx-ink-2: #241c1a;
+  --fx-muted: #76615b;
+  --fx-faint: #967c75;
+
+  --fx-line: #eae4e3;
+  --fx-line-2: #d7c9c6;
+  --fx-control-border: #9c8780;
+
+  /* ONE accent. Status colours below are status only — never decoration. */
+  --fx-accent: #fd5f30;
+  /* The brief's #cf450e is 4.66:1 on a card but 4.1:1 on the page background:
+     accent text sits on both, so it takes the button's hover shade (5.0:1). */
+  --fx-accent-strong: #b83c0b;
+  --fx-accent-weak: #fff0ef;
+  --fx-button: #cf450e;
+  --fx-button-hover: #b83c0b;
+  --fx-on-button: #ffffff;
+
+  --fx-ok: #1f8f62;
+  --fx-ok-ink: #166a4a;
+  --fx-ok-soft: #e3f4ec;
+  --fx-signal: #e08a1e;
+  --fx-signal-ink: #8a5300;
+  --fx-signal-soft: #fbf0df;
+  --fx-danger: #b42318;
+  --fx-danger-soft: #fdecea;
+
+  --fx-shadow: 0 1px 2px rgba(21, 16, 14, 0.05), 0 10px 26px -14px rgba(253, 95, 48, 0.2);
+  /* The dim layer behind a modal: dark in both themes, never the ink colour. */
+  --fx-scrim: rgba(21, 16, 14, 0.45);
+  /* Charts (widget-views plan). chart-1 is the accent and the only colour a
+     single-series chart uses; 2 and 3 appear only where parts must be told
+     apart; "other" is reserved for the long tail. Each is 3:1+ on the card;
+     orange and gold separate by lightness, and parts are always labelled. */
+  --fx-chart-1: var(--fx-accent);
+  --fx-chart-2: #2f6fdc;
+  --fx-chart-3: #6e5000;
+  --fx-chart-other: #968b87;
+
+  --fx-radius-card: 14px;
+  --fx-radius-input: 10px;
+  --fx-radius-pill: 999px;
+
+  --fx-space: 4px;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fx-bg: #15100e;
+    --fx-card: #241c1a;
+    --fx-inset: #1c1613;
+    --fx-cream: #2a211d;
+
+    --fx-ink: #f7f3f1;
+    --fx-ink-2: #eae4e3;
+    --fx-muted: #b7a49e;
+    --fx-faint: #967c75;
+
+    --fx-line: #3e322f;
+    --fx-line-2: #5b4a46;
+    --fx-control-border: #7a6661;
+
+    --fx-accent: #fd5f30;
+    --fx-accent-strong: #fd8772;
+    --fx-accent-weak: #2a1a14;
+    --fx-button: #cf450e;
+    --fx-button-hover: #b83c0b;
+    --fx-on-button: #ffffff;
+
+    --fx-ok: #4cc38a;
+    --fx-ok-ink: #4cc38a;
+    --fx-ok-soft: rgba(31, 143, 98, 0.2);
+    --fx-signal: #e9a94a;
+    --fx-signal-ink: #e9a94a;
+    --fx-signal-soft: rgba(224, 138, 30, 0.18);
+    --fx-danger: #ff7a85;
+    --fx-danger-soft: rgba(255, 122, 133, 0.16);
+
+    --fx-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px -16px rgba(0, 0, 0, 0.7);
+    --fx-scrim: rgba(0, 0, 0, 0.6);
+    --fx-chart-2: #6f9eff;
+    --fx-chart-3: #f2c94c;
+    --fx-chart-other: #7d706c;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --fx-bg: #15100e;
+  --fx-card: #241c1a;
+  --fx-inset: #1c1613;
+  --fx-cream: #2a211d;
+
+  --fx-ink: #f7f3f1;
+  --fx-ink-2: #eae4e3;
+  --fx-muted: #b7a49e;
+  --fx-faint: #967c75;
+
+  --fx-line: #3e322f;
+  --fx-line-2: #5b4a46;
+  --fx-control-border: #7a6661;
+
+  --fx-accent: #fd5f30;
+  --fx-accent-strong: #fd8772;
+  --fx-accent-weak: #2a1a14;
+  --fx-button: #cf450e;
+  --fx-button-hover: #b83c0b;
+  --fx-on-button: #ffffff;
+
+  --fx-ok: #4cc38a;
+  --fx-ok-ink: #4cc38a;
+  --fx-ok-soft: rgba(31, 143, 98, 0.2);
+  --fx-signal: #e9a94a;
+  --fx-signal-ink: #e9a94a;
+  --fx-signal-soft: rgba(224, 138, 30, 0.18);
+  --fx-danger: #ff7a85;
+  --fx-danger-soft: rgba(255, 122, 133, 0.16);
+
+  --fx-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px -16px rgba(0, 0, 0, 0.7);
+  --fx-scrim: rgba(0, 0, 0, 0.6);
+  --fx-chart-2: #6f9eff;
+  --fx-chart-3: #f2c94c;
+  --fx-chart-other: #7d706c;
+}

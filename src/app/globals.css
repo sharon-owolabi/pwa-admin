@@ -1,0 +1,90 @@
+@import "tailwindcss";
+/* In fusion-client this is "@fusion/design-tokens/tokens.css" (see MERGE.md). */
+@import "../../design-tokens/tokens.css";
+
+/* Tokens are the only colour source. See /DESIGN.md — CI enforces this.
+   Each utility below is a token; a theme swap changes the tokens, never this.
+   The same vocabulary as apps/app: the old admin names (surface, border, text) are gone. */
+@theme inline {
+  --color-bg: var(--fx-bg);
+  --color-card: var(--fx-card);
+  --color-inset: var(--fx-inset);
+  --color-cream: var(--fx-cream);
+
+  --color-ink: var(--fx-ink);
+  --color-ink-2: var(--fx-ink-2);
+  --color-muted: var(--fx-muted);
+  --color-faint: var(--fx-faint);
+
+  --color-line: var(--fx-line);
+  --color-line-2: var(--fx-line-2);
+  --color-control: var(--fx-control-border);
+
+  --color-accent: var(--fx-accent);
+  --color-accent-strong: var(--fx-accent-strong);
+  --color-accent-weak: var(--fx-accent-weak);
+  --color-button: var(--fx-button);
+  --color-button-hover: var(--fx-button-hover);
+  --color-on-button: var(--fx-on-button);
+
+  /* Status only — never decoration. Text on a soft wash uses the -ink shade. */
+  --color-ok: var(--fx-ok);
+  --color-ok-ink: var(--fx-ok-ink);
+  --color-ok-soft: var(--fx-ok-soft);
+  --color-signal: var(--fx-signal);
+  --color-signal-ink: var(--fx-signal-ink);
+  --color-signal-soft: var(--fx-signal-soft);
+  --color-danger: var(--fx-danger);
+  --color-danger-soft: var(--fx-danger-soft);
+
+  --radius-card: var(--fx-radius-card);
+  --radius-input: var(--fx-radius-input);
+  --radius-pill: var(--fx-radius-pill);
+
+  --shadow-card: var(--fx-shadow);
+  --color-scrim: var(--fx-scrim);
+
+  --font-sans: var(--fx-font-sans);
+  --font-mono: var(--fx-font-mono);
+}
+
+:root {
+  --fx-shell-height: 7rem;
+  /* next/font sets --font-hanken and --font-space-mono on <html> (app/layout.tsx). */
+  --fx-font-sans: var(--font-hanken), system-ui, sans-serif;
+  --fx-font-mono: var(--font-space-mono), ui-monospace, monospace;
+}
+
+/* The header and nav are sticky: anything scrolled into view lands below them. */
+html {
+  scroll-padding-top: var(--fx-shell-height);
+}
+
+body {
+  background: var(--fx-bg);
+  color: var(--fx-ink-2);
+  font-family: var(--fx-font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--fx-ink);
+}
+
+/* Small structural labels (eyebrows, table headers, KPI labels, gateway
+   names): Space Mono, uppercase, letter-spaced. Never form field labels. */
+@utility label-mono {
+  font-family: var(--fx-font-mono);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* One focus ring for everything that has no ring of its own. */
+:focus-visible {
+  outline: 2px solid var(--fx-accent);
+  outline-offset: 2px;
+}
