@@ -1,6 +1,7 @@
 import type {
   Approval,
   AuditEvent,
+  Project,
   Connector,
   MappingRun,
   Me,
@@ -108,6 +109,88 @@ TENANTS.forEach((tenant, ti) => {
     };
   });
 });
+
+const SOURCES = ["fusion", "merchant", "simulated"] as const;
+
+/**
+ * Checkout projects per fixture merchant, covering every case the screen must
+ * handle: none, one active, several with an archived one, a project with no
+ * gateways, one that never took a payment, a live-paying one and revoked keys.
+ */
+function projectsFor(ti: number): Project[] {
+  const tenant = TENANTS[ti]!;
+  const born = Date.parse(tenant.createdAt);
+  // A point `f` of the way from the merchant joining to "now", so no date is in the future.
+  const at = (f: number) => iso(born + f * (NOW - born));
+  const gateways = (n: number): Project["gateways"] =>
+    GATEWAYS.slice(0, n).map((gateway, i) => ({
+      gateway,
+      priority: i + 1,
+      enabledSandbox: !(ti % 7 === 2 && i === 1),
+      sandboxSource: SOURCES[(ti + i) % 3]!,
+    }));
+  const project = (n: number, name: string, over: Partial<Project>): Project => ({
+    id: uuid(11, ti * 8 + n),
+    publicId: `proj_${(ti * 8 + n + 1000).toString(36)}${(ti * 31 + n).toString(36)}`,
+    name,
+    createdAt: at(0.01 + 0.02 * n),
+    archivedAt: null,
+    firstTestPaymentAt: null,
+    firstLivePaymentAt: null,
+    gateways: gateways(1),
+    keys: { sandbox: { active: 1, revoked: 0 }, live: { active: 0, revoked: 0 } },
+    ...over,
+  });
+  switch (ti % 5) {
+    case 1: // one active project, test payments only
+      return [project(0, "Storefront", { firstTestPaymentAt: at(0.1), gateways: gateways(2) })];
+    case 2: // several, one archived, one with no gateways
+      return [
+        project(0, "Old checkout", {
+          archivedAt: at(0.5),
+          firstTestPaymentAt: at(0.1),
+          firstLivePaymentAt: at(0.2),
+          keys: { sandbox: { active: 0, revoked: 2 }, live: { active: 0, revoked: 1 } },
+        }),
+        project(1, "Web shop", {
+          firstTestPaymentAt: at(0.55),
+          firstLivePaymentAt: at(0.6),
+          gateways: gateways(3),
+          keys: { sandbox: { active: 3, revoked: 1 }, live: { active: 2, revoked: 0 } },
+        }),
+        project(2, "Marketplace (draft)", { gateways: [] }),
+      ];
+    case 3: // never paid, and a live-paying one
+      return [
+        project(0, "Pilot", {}),
+        project(1, "Main site", {
+          firstTestPaymentAt: at(0.15),
+          firstLivePaymentAt: at(0.25),
+          gateways: gateways(2),
+          keys: { sandbox: { active: 2, revoked: 0 }, live: { active: 1, revoked: 0 } },
+        }),
+      ];
+    case 4: // revoked keys everywhere
+      return [
+        project(0, "Mobile app", {
+          firstTestPaymentAt: at(0.12),
+          gateways: gateways(2),
+          keys: { sandbox: { active: 0, revoked: 4 }, live: { active: 0, revoked: 2 } },
+        }),
+      ];
+    default: // none
+      return [];
+  }
+}
+
+/** Merchants with no connections have no projects either. */
+export const PROJECTS: Record<string, Project[]> = Object.fromEntries(
+  TENANTS.map((t, ti) => [t.id, t.connectionCount === 0 ? [] : projectsFor(ti)]),
+);
+
+export const ACTIVE_PROJECT_TOTAL = Object.values(PROJECTS)
+  .flat()
+  .filter((p) => p.archivedAt === null).length;
 
 export const TRANSACTION_STATUSES = ["succeeded", "failed", "pending", "reversed", "abandoned", "unknown"] as const;
 

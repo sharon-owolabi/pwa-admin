@@ -104,10 +104,22 @@ function Overview() {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card title="Merchants">
-          <p className="text-4xl font-semibold tracking-tight text-ink tabular-nums">
-            {formatCount(data.tenants.total)}
-          </p>
+        <Card title="Merchants and projects">
+          <div className="flex flex-wrap gap-x-10 gap-y-3">
+            <div>
+              <p className="text-4xl font-semibold tracking-tight text-ink tabular-nums">
+                {formatCount(data.tenants.total)}
+              </p>
+              <p className="mt-1 text-sm text-muted">Merchants</p>
+            </div>
+            <div>
+              <p className="text-4xl font-semibold tracking-tight text-ink tabular-nums">
+                {formatCount(data.projects.total)}
+              </p>
+              <p className="mt-1 text-sm text-muted">Checkout projects</p>
+              <p className="text-xs text-muted">Active, not archived</p>
+            </div>
+          </div>
           {canTenants ? (
             <Link href="/merchants" className={`${linkClass} mt-3 inline-block text-sm`}>
               View all merchants

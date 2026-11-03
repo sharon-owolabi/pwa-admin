@@ -11,7 +11,9 @@ import {
   CONNECTORS,
   DATA_UP_TO,
   MAPPING_RUNS,
+  ACTIVE_PROJECT_TOTAL,
   NOW,
+  PROJECTS,
   ROLES,
   RUNS,
   SESSIONS_SEED,
@@ -126,6 +128,7 @@ export const mockReadApi: ReadApi = {
     return {
       dataUpTo: DATA_UP_TO,
       tenants: { total: TENANTS.length },
+      projects: { total: ACTIVE_PROJECT_TOTAL },
       connectionsByGateway: CONNECTORS.map((c) => ({
         gateway: c.gateway,
         total: Object.values(c.connections).reduce((a, b) => a + b, 0),
@@ -176,6 +179,7 @@ export const mockReadApi: ReadApi = {
       dataUpTo: DATA_UP_TO,
       connections: CONNECTIONS[id] ?? [],
       transactionCounts: transactionCounts(id),
+      projects: PROJECTS[id] ?? [],
     };
   },
 

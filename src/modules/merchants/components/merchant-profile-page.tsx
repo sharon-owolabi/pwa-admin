@@ -20,6 +20,7 @@ import { formatCount } from "@/shared/lib/number";
 import { titleCase } from "@/shared/lib/status";
 import { RequirePermission } from "@/modules/auth/components/require-permission";
 import { useCan } from "@/modules/auth/hooks/use-can";
+import { ProjectsSection } from "./projects-section";
 import { auditLine } from "@/modules/audit/lib/labels";
 import { runColumns } from "@/modules/sync-runs/components/run-columns";
 
@@ -189,6 +190,10 @@ function Profile({ id }: { id: string }) {
         ) : (
           <DataTable caption="Connections" columns={connectionColumns} rows={connections} rowKey={(c) => c.id} />
         )}
+      </Section>
+
+      <Section title="Checkout projects">
+        <ProjectsSection projects={t.projects} />
       </Section>
 
       <Section title="Transaction counts">

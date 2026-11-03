@@ -22,13 +22,42 @@ export interface ApiErrorBody {
 }
 
 export type Me = Data<"get_me">;
-export type Overview = Data<"get_overview">;
+/**
+ * INTERIM: the checkout-project fields are in the API's working tree but not in
+ * the generated contract yet. These intersections add them; once
+ * admin-contract.ts is regenerated they are redundant (and compatible), so
+ * delete `Project`, `ProjectsOverview` and the two `&` below then.
+ */
+export type SandboxSource = "fusion" | "merchant" | "simulated";
+export type KeyCounts = { active: number; revoked: number };
+export interface Project {
+  id: string;
+  publicId: string;
+  name: string;
+  createdAt: string;
+  /** null = active. */
+  archivedAt: string | null;
+  firstTestPaymentAt: string | null;
+  firstLivePaymentAt: string | null;
+  /** Launch gateways only, in priority order (1 is tried first). */
+  gateways: {
+    gateway: "paystack" | "flutterwave" | "interswitch";
+    priority: number;
+    enabledSandbox: boolean;
+    sandboxSource: SandboxSource;
+  }[];
+  /** Counts only. Never key material. */
+  keys: { sandbox: KeyCounts; live: KeyCounts };
+}
+type ProjectsOverview = { projects: { total: number } };
+
+export type Overview = Data<"get_overview"> & ProjectsOverview;
 export type AuditEvent = Overview["recentAudit"][number];
 export type NotAvailable = Overview["notAvailable"][number];
 
 export type TenantPage = Data<"get_tenants">;
 export type TenantRow = TenantPage["items"][number];
-export type TenantDetail = Data<"get_tenants_id">;
+export type TenantDetail = Data<"get_tenants_id"> & { projects: Project[] };
 export type TenantConnection = TenantDetail["connections"][number];
 
 export type Connector = Data<"get_connectors">[number];

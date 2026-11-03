@@ -70,3 +70,23 @@ describe("approvals", () => {
     expect(approvalActions({ ...base, meId: "b", status: "approved" })).toEqual({ decide: false, cancel: false });
   });
 });
+
+import { byPriority, isActiveProject, keyCountsText, sourceLabel } from "@/modules/merchants/lib/projects";
+
+describe("checkout projects", () => {
+  it("writes key counts, zero included", () => {
+    expect(keyCountsText({ active: 3, revoked: 1 })).toBe("3 active, 1 revoked");
+    expect(keyCountsText({ active: 0, revoked: 0 })).toBe("0 active, 0 revoked");
+  });
+  it("labels sandbox sources and tolerates a new one", () => {
+    expect(sourceLabel("fusion")).toBe("Fusion sandbox");
+    expect(sourceLabel("brand_new")).toBe("brand_new");
+  });
+  it("treats archivedAt null as active", () => {
+    expect(isActiveProject({ archivedAt: null })).toBe(true);
+    expect(isActiveProject({ archivedAt: "2026-10-01T00:00:00Z" })).toBe(false);
+  });
+  it("orders gateways by priority", () => {
+    expect(byPriority([{ priority: 2, g: "b" }, { priority: 1, g: "a" }]).map((x) => x.g)).toEqual(["a", "b"]);
+  });
+});
