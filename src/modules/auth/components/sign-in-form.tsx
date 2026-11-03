@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { authApi } from "@/shared/api/client";
+import { authApi, readApi } from "@/shared/api/client";
 import { errorMessage, isApiError } from "@/shared/api/errors";
 import { Field, FormError } from "@/shared/components/field";
 import { primaryButton } from "@/shared/components/styles";
@@ -16,7 +16,7 @@ export function SignInForm() {
   const router = useRouter();
   const params = useSearchParams();
   const queryClient = useQueryClient();
-  const [challengeId, setChallengeId] = useState<string | null>(null);
+  const [needsCode, setNeedsCode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -29,29 +29,43 @@ export function SignInForm() {
     setError(null);
     try {
       const result = await authApi.signIn({ email: email.trim(), password });
-      setChallengeId(result.challengeId);
       setPassword("");
+      if (!result.mfaRequired) {
+        // Fully signed in already: whoever it is owns the cache from here.
+        queryClient.clear();
+        await queryClient.fetchQuery({ queryKey: ["me"], queryFn: () => readApi.me() });
+        router.replace(safeNext(params.get("next")));
+      } else if (!result.mfaEnrolled) {
+        // No authenticator on this account: the code step could never succeed.
+        setError({
+          message: "This account has no authenticator set up. Use your invitation link, or ask a Super Admin to reset your credentials.",
+          locked: false,
+        });
+      } else {
+        setNeedsCode(true);
+      }
     } catch (err) {
-      setError({ message: errorMessage(err), locked: isApiError(err) && err.code === "account_locked" });
+      // Wrong password, unknown user, deactivated and locked-out share one 401 on purpose:
+      // never try to tell them apart. A 429 is the rate limit.
+      setError({ message: errorMessage(err), locked: isApiError(err) && err.statusCode === 429 });
     } finally {
       setBusy(false);
     }
   }
 
   async function verify(code: string) {
-    if (!challengeId) return;
-    const me = await authApi.verifyTotp({ challengeId, code });
+    const me = await authApi.verifyMfa({ code });
     // Whoever signed in last owns the cache: nothing from a previous person survives.
     queryClient.clear();
     queryClient.setQueryData(["me"], me);
     router.replace(safeNext(params.get("next")));
   }
 
-  if (challengeId) {
+  if (needsCode) {
     return (
       <div>
         <p className="mb-4 text-sm text-muted">Enter the code from your authenticator app to finish signing in.</p>
-        <CodeForm submitLabel="Verify and sign in" onSubmit={verify} onBack={() => setChallengeId(null)} />
+        <CodeForm submitLabel="Verify and sign in" onSubmit={verify} onBack={() => setNeedsCode(false)} />
         <MockHint>Code 123456.</MockHint>
       </div>
     );
@@ -62,7 +76,7 @@ export function SignInForm() {
       {error ? (
         <FormError>
           {error.message}
-          {error.locked ? " This is a security lockout: it lifts by itself." : ""}
+          {error.locked ? " Wait a little before trying again." : ""}
         </FormError>
       ) : null}
       <Field

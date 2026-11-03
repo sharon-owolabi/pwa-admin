@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import type { TenantRow } from "@/shared/api/contract.draft";
+import type { TenantRow } from "@/shared/api/contract";
 import { usePageSize, useTenants } from "@/shared/api/hooks";
 import { ADMIN_PERMISSION } from "@/shared/api/permissions";
 import type { Column } from "@/shared/components/data-table";
@@ -17,7 +17,9 @@ import { PagedTable } from "@/shared/components/paged-table";
 import { Select } from "@/shared/components/select";
 import { linkClass } from "@/shared/components/styles";
 import { TimeCell } from "@/shared/components/time-cell";
-import { dayEndIso, dayStartIso, formatDate } from "@/shared/lib/dates";
+import { formatDate } from "@/shared/lib/dates";
+import { LAUNCH_GATEWAYS } from "@/shared/lib/gateways";
+import { CONNECTION_STATUSES, TENANT_SORTS, dateOnly, oneOf } from "@/shared/lib/vocab";
 import { countFilters } from "@/shared/lib/filters";
 import { titleCase } from "@/shared/lib/status";
 import { formatCount } from "@/shared/lib/number";
@@ -25,7 +27,6 @@ import { useUrlFilters } from "@/shared/lib/use-url-filters";
 import { RequirePermission } from "@/modules/auth/components/require-permission";
 
 const KEYS = ["search", "gateway", "connectionStatus", "joinedFrom", "joinedTo", "sort"] as const;
-const CONNECTION_STATUSES = ["active", "connecting", "backfilling", "degraded", "error", "paused", "revoked"];
 const SORTS = [
   { value: "-createdAt", label: "Newest first" },
   { value: "createdAt", label: "Oldest first" },
@@ -33,6 +34,8 @@ const SORTS = [
   { value: "-name", label: "Name Z–A" },
   { value: "-lastSyncedAt", label: "Synced most recently" },
   { value: "lastSyncedAt", label: "Synced least recently" },
+  { value: "-lastActivityAt", label: "Active most recently" },
+  { value: "lastActivityAt", label: "Active least recently" },
 ] as const;
 
 export const merchantColumns: readonly Column<TenantRow>[] = [
@@ -46,7 +49,7 @@ export const merchantColumns: readonly Column<TenantRow>[] = [
       </Link>
     ),
   },
-  { key: "id", header: "Id", cell: (t) => <code className="font-mono text-xs">{t.id}</code> },
+  { key: "id", header: "Id", cell: (t) => <code className="font-mono text-xs break-all">{t.id}</code> },
   { key: "country", header: "Country", cell: (t) => t.country },
   { key: "currency", header: "Reporting currency", cell: (t) => t.reportingCurrency },
   { key: "members", header: "Members", cell: (t) => <span className="tabular-nums">{formatCount(t.memberCount)}</span> },
@@ -61,11 +64,12 @@ function Merchants() {
   const query = useMemo(
     () => ({
       search: filters.search,
-      gateway: filters.gateway,
-      connectionStatus: filters.connectionStatus,
-      joinedFrom: filters.joinedFrom ? dayStartIso(filters.joinedFrom) : undefined,
-      joinedTo: filters.joinedTo ? dayEndIso(filters.joinedTo) : undefined,
-      sort: filters.sort,
+      gateway: oneOf(LAUNCH_GATEWAYS, filters.gateway),
+      connectionStatus: oneOf(CONNECTION_STATUSES, filters.connectionStatus),
+      // The API takes plain dates here (not instants).
+      joinedFrom: dateOnly(filters.joinedFrom),
+      joinedTo: dateOnly(filters.joinedTo),
+      sort: oneOf(TENANT_SORTS, filters.sort),
     }),
     [filters],
   );

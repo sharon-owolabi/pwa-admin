@@ -9,8 +9,8 @@ export const NAV: readonly { href: string; label: string; permission: AdminPermi
   { href: "/overview", label: "Overview", permission: ADMIN_PERMISSION.OVERVIEW_VIEW },
   { href: "/merchants", label: "Merchants", permission: ADMIN_PERMISSION.TENANTS_VIEW },
   { href: "/gateways", label: "Gateways", permission: ADMIN_PERMISSION.CONNECTORS_VIEW },
-  { href: "/sync-runs", label: "Sync runs", permission: ADMIN_PERMISSION.RUNS_VIEW },
-  { href: "/data-quality", label: "Data quality", permission: ADMIN_PERMISSION.QUALITY_VIEW },
+  { href: "/sync-runs", label: "Sync runs", permission: ADMIN_PERMISSION.CONNECTORS_VIEW },
+  { href: "/data-quality", label: "Data quality", permission: ADMIN_PERMISSION.CONNECTORS_VIEW },
   { href: "/audit", label: "Audit and security", permission: ADMIN_PERMISSION.AUDIT_VIEW },
   { href: "/staff", label: "Staff", permission: ADMIN_PERMISSION.STAFF_VIEW },
 ];

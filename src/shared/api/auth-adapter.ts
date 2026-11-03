@@ -1,41 +1,42 @@
 import type {
+  AcceptedInvite,
+  Approval,
+  InvitedMember,
   Me,
-  StaffList,
-  StaffSession,
-  TotpEnrolment,
-} from "./contract.draft";
+  SignInResult,
+  StaffMember,
+} from "./contract";
+
+/** A change that either happened, or is waiting for a second approver (HTTP 202). */
+export type Outcome<T> = { status: "done"; value: T } | { status: "pending_approval"; approval: Approval };
 
 /**
- * The write side the UI needs: sign-in, MFA, invitations, sessions and staff
- * management. Narrow on purpose. The API team has not decided Better Auth
- * routes vs custom routes (Q1), so the screens talk to this interface and one
- * file changes when they do. Staff writes take a reason and an idempotency key.
+ * Every write the console makes: sign-in, MFA, invitations, sessions, staff and
+ * approvals. The API has NO idempotency key. Staff writes carry a `reason`.
+ * Failures throw ApiError (the API's own message is shown).
  */
-export type SignInResult = { status: "mfa_required"; challengeId: string };
-
-export type AcceptInviteResult = { enrolment: TotpEnrolment };
-
-export type ChangeRoleResult = { status: "changed" } | { status: "pending_approval" };
-
 export interface AuthAdapter {
+  /** Step 1. The server keeps a pending-MFA cookie; there is no challenge id. */
   signIn(input: { email: string; password: string }): Promise<SignInResult>;
-  verifyTotp(input: { challengeId: string; code: string }): Promise<Me>;
+  /** Step 2. Swaps the pending cookie for a full session and returns who signed in. */
+  verifyMfa(input: { code: string }): Promise<Me>;
   signOut(): Promise<void>;
-  acceptInvite(input: { token: string; password: string }): Promise<AcceptInviteResult>;
-  enrolTotp(input: { enrolmentId: string; code: string }): Promise<Me>;
-  listSessions(): Promise<StaffSession[]>;
+  /** The first authenticator code then goes to `verifyMfa`: there is no separate enrol call. */
+  acceptInvite(input: { token: string; name: string; password: string }): Promise<AcceptedInvite>;
   revokeSession(input: { sessionId: string }): Promise<void>;
-  listStaff(): Promise<StaffList>;
-  inviteStaff(input: { email: string; roleKey: string; idempotencyKey: string }): Promise<void>;
-  changeRole(input: {
-    staffId: string;
+
+  inviteStaff(input: {
+    email: string;
+    name: string;
     roleKey: string;
     reason: string;
-    idempotencyKey: string;
-  }): Promise<ChangeRoleResult>;
-  deactivateStaff(input: {
-    staffId: string;
-    reason: string;
-    idempotencyKey: string;
-  }): Promise<void>;
+  }): Promise<Outcome<InvitedMember>>;
+  changeRole(input: { staffId: string; roleKey: string; reason: string }): Promise<Outcome<StaffMember>>;
+  deactivateStaff(input: { staffId: string; reason: string }): Promise<StaffMember>;
+  reissueInvitation(input: { staffId: string; reason: string }): Promise<InvitedMember>;
+  resetCredentials(input: { staffId: string; reason: string }): Promise<InvitedMember>;
+
+  approve(input: { approvalId: string; reason?: string }): Promise<Approval>;
+  reject(input: { approvalId: string; reason?: string }): Promise<Approval>;
+  cancel(input: { approvalId: string }): Promise<Approval>;
 }

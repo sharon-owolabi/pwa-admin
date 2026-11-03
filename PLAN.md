@@ -172,3 +172,9 @@ Built standalone in `/Users/sharonowolabi/Desktop/fusion-admin-console` (this fo
 only. All of U1–U4 are implemented against the mock; see MERGE.md for folding it into `fusion-client`.
 Verified: `tsc --noEmit`, design-token check, vitest (see below), production build. Not verified: real API,
 browser accessibility audit (`agent-browser` not run), CI-only checks (knip, polling, i18n).
+
+## Update 2026-11-03: connected to the real admin API contract
+
+`contract.draft.ts` is gone. Types derive from the generated admin contract; the mock follows it; the
+approvals screen and staff recovery actions exist. Differences from the draft that were fixed are listed in the
+hand-off message. Contract questions Q1, Q3, Q6, Q7, Q8 are answered by the spec.

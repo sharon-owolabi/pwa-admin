@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { UNAUTHORIZED_EVENT } from "@/shared/api/client";
-import type { Me } from "@/shared/api/contract.draft";
+import type { Me } from "@/shared/api/contract";
 import { errorMessage, isUnauthorized } from "@/shared/api/errors";
 import { useMe } from "@/shared/api/hooks";
 import { LoadingRegion, Skeleton } from "@/shared/components/skeleton";

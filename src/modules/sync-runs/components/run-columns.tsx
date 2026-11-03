@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { SyncRun } from "@/shared/api/contract.draft";
+import type { SyncRun } from "@/shared/api/contract";
 import type { Column } from "@/shared/components/data-table";
 import { StatusBadge } from "@/shared/components/status-badge";
 import { linkClass } from "@/shared/components/styles";
@@ -25,7 +25,7 @@ export const runColumns: readonly Column<SyncRun>[] = [
     header: "Merchant",
     cell: (r) => (
       <Link href={`/merchants/${r.workspaceId}`} className={linkClass}>
-        <code className="font-mono text-xs">{r.workspaceId}</code>
+        <code className="font-mono text-xs break-all">{r.workspaceId}</code>
       </Link>
     ),
   },

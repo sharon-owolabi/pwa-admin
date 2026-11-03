@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import type { TenantConnection, SyncRun } from "@/shared/api/contract.draft";
+import type { TenantConnection, SyncRun } from "@/shared/api/contract";
 import { errorMessage, isNotFound } from "@/shared/api/errors";
 import { useAuditEvents, useRuns, useTenant } from "@/shared/api/hooks";
 import { ADMIN_PERMISSION } from "@/shared/api/permissions";
@@ -49,7 +49,7 @@ function Section({ title, children, action }: { title: string; children: React.R
 }
 
 function RecentRuns({ tenantId }: { tenantId: string }) {
-  const canRuns = useCan(ADMIN_PERMISSION.RUNS_VIEW);
+  const canRuns = useCan(ADMIN_PERMISSION.CONNECTORS_VIEW);
   const { data, isPending, isError } = useRuns({ tenantId }, 5, canRuns).query;
   if (!canRuns) return null;
   const rows: SyncRun[] = data?.items ?? [];
@@ -165,8 +165,10 @@ function Profile({ id }: { id: string }) {
       <Section title="Account">
         <dl className="grid divide-y divide-line rounded-card border border-line bg-card px-5 text-sm shadow-card sm:grid-cols-2 sm:gap-x-10 sm:divide-y-0">
           {[
-            ["Merchant id", <code key="i" className="font-mono text-xs">{t.id}</code>],
+            ["Merchant id", <code key="i" className="font-mono text-xs break-all">{t.id}</code>],
+            ["Organisation id", <code key="o" className="font-mono text-xs break-all">{t.organisationId}</code>],
             ["Country", t.country],
+            ["Timezone", t.timezone],
             ["Reporting currency", t.reportingCurrency],
             ["Created", formatDate(t.createdAt)],
             ["Members", <span key="m" className="tabular-nums">{formatCount(t.memberCount)}</span>],

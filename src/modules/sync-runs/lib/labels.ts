@@ -1,11 +1,15 @@
 import { titleCase } from "@/shared/lib/status";
 
 const KNOWN: Record<string, string> = {
-  rate_limited: "Rate limited by the gateway",
   auth_failed: "Gateway rejected the credentials",
-  upstream_unavailable: "Gateway unavailable",
-  timeout: "Timed out",
-  schema_changed: "Gateway response changed shape",
+  rate_limited: "Rate limited by the gateway",
+  upstream_error: "Gateway returned an error",
+  connection_unavailable: "Connection unavailable",
+  credentials_unreadable: "Stored credentials could not be read",
+  enqueue_failed: "Could not queue the run",
+  internal_error: "Internal error",
+  interrupted: "Interrupted",
+  unknown: "Unknown",
 };
 
 /** The error CATEGORY only — never a raw error or checkpoint. null is a gap in what is recorded. */

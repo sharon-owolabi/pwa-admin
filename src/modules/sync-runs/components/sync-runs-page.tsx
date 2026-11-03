@@ -13,22 +13,24 @@ import { PageHeader } from "@/shared/components/page-header";
 import { PagedTable } from "@/shared/components/paged-table";
 import { dayEndIso, dayStartIso } from "@/shared/lib/dates";
 import { countFilters } from "@/shared/lib/filters";
+import { LAUNCH_GATEWAYS } from "@/shared/lib/gateways";
 import { titleCase } from "@/shared/lib/status";
+import { uuidOrUndefined } from "@/shared/lib/uuid";
+import { RUN_STATUSES, oneOf } from "@/shared/lib/vocab";
 import { useUrlFilters } from "@/shared/lib/use-url-filters";
 import { RequirePermission } from "@/modules/auth/components/require-permission";
 import { runColumns } from "./run-columns";
 
 const KEYS = ["tenantId", "gateway", "status", "from", "to"] as const;
-const RUN_STATUSES = ["running", "succeeded", "failed", "cancelled"];
 
 function SyncRuns() {
   const { filters, setFilter, clear } = useUrlFilters(KEYS);
   const [pageSize, setPageSize] = usePageSize();
   const query = useMemo(
     () => ({
-      tenantId: filters.tenantId,
-      gateway: filters.gateway,
-      status: filters.status,
+      tenantId: uuidOrUndefined(filters.tenantId),
+      gateway: oneOf(LAUNCH_GATEWAYS, filters.gateway),
+      status: oneOf(RUN_STATUSES, filters.status),
       from: filters.from ? dayStartIso(filters.from) : undefined,
       to: filters.to ? dayEndIso(filters.to) : undefined,
     }),
@@ -48,7 +50,7 @@ function SyncRuns() {
       onClear={clear}
       filters={
         <>
-          <TextFilter label="Merchant id" value={filters.tenantId} onChange={(v) => setFilter({ tenantId: v })} />
+          <TextFilter label="Merchant id (UUID)" value={filters.tenantId} onChange={(v) => setFilter({ tenantId: v })} />
           <SelectFilter label="Gateway" value={filters.gateway} onChange={(v) => setFilter({ gateway: v })} options={GATEWAY_OPTIONS} />
           <SelectFilter
             label="Status"
@@ -71,7 +73,7 @@ export function SyncRunsPage() {
         title="Sync runs"
         description="Every ingestion run: counts, pages and outcome. Errors appear as a category only."
       />
-      <RequirePermission permission={ADMIN_PERMISSION.RUNS_VIEW}>
+      <RequirePermission permission={ADMIN_PERMISSION.CONNECTORS_VIEW}>
         <SyncRuns />
       </RequirePermission>
     </>

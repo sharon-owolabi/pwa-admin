@@ -8,8 +8,8 @@ export { UNAUTHORIZED_EVENT } from "./http-adapter";
 
 /**
  * THE admin API boundary. Screens never fetch; they use the hooks in this
- * folder, which go through these two objects. Until the admin SDK exists the
- * mock is on by default (NEXT_PUBLIC_ADMIN_MOCK).
+ * folder, which go through these two objects. The real API is the default; the
+ * mock is on only with NEXT_PUBLIC_ADMIN_MOCK=on.
  */
 export const readApi: ReadApi = MOCK_ENABLED ? mockReadApi : httpReadApi;
 export const authApi: AuthAdapter = MOCK_ENABLED ? mockAuthAdapter : httpAuthAdapter;

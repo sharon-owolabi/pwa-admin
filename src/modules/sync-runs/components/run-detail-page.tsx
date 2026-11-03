@@ -123,7 +123,7 @@ export function RunDetailPage() {
         </Link>
       </p>
       <PageHeader title="Sync run" description={<code className="font-mono text-xs">{id}</code>} />
-      <RequirePermission permission={ADMIN_PERMISSION.RUNS_VIEW}>
+      <RequirePermission permission={ADMIN_PERMISSION.CONNECTORS_VIEW}>
         <RunDetail id={id} />
       </RequirePermission>
     </>

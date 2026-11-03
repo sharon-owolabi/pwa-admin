@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import type { AuditEvent } from "@/shared/api/contract.draft";
+import type { AuditEvent } from "@/shared/api/contract";
 import { useAuditEvents, usePageSize } from "@/shared/api/hooks";
 import { ADMIN_PERMISSION } from "@/shared/api/permissions";
 import type { Column } from "@/shared/components/data-table";
@@ -14,18 +14,18 @@ import { linkClass } from "@/shared/components/styles";
 import { TimeCell } from "@/shared/components/time-cell";
 import { dayEndIso, dayStartIso } from "@/shared/lib/dates";
 import { countFilters } from "@/shared/lib/filters";
+import { uuidOrUndefined } from "@/shared/lib/uuid";
+import { AUDIT_SCOPES, oneOf } from "@/shared/lib/vocab";
 import { useUrlFilters } from "@/shared/lib/use-url-filters";
 import { RequirePermission } from "@/modules/auth/components/require-permission";
-import { actionLabel, targetLabel } from "../lib/labels";
+import { actionLabel, actorName, targetLabel } from "../lib/labels";
 
 const KEYS = ["actor", "action", "target", "tenantId", "scope", "from", "to"] as const;
 
-// `metadata` is deliberately not a column: it is not rendered until the API
-// confirms it never holds merchant content (Q6).
 const columns: readonly Column<AuditEvent>[] = [
   { key: "when", header: "When", primary: true, cell: (e) => <TimeCell value={e.createdAt} absolute /> },
   { key: "scope", header: "Scope", cell: (e) => <StatusBadge status="muted" label={e.scope === "platform" ? "Platform" : "Merchant"} /> },
-  { key: "actor", header: "Actor", cell: (e) => e.actorLabel },
+  { key: "actor", header: "Actor", cell: (e) => actorName(e) },
   { key: "action", header: "Action", cell: (e) => actionLabel(e.action) },
   { key: "target", header: "Target", cell: (e) => targetLabel(e) ?? <span className="text-muted">None</span> },
   {
@@ -40,6 +40,11 @@ const columns: readonly Column<AuditEvent>[] = [
         <span className="text-muted">None</span>
       ),
   },
+  {
+    key: "reason",
+    header: "Reason",
+    cell: (e) => e.reason ?? <span className="text-muted">None given</span>,
+  },
 ];
 
 function Audit() {
@@ -47,7 +52,11 @@ function Audit() {
   const [pageSize, setPageSize] = usePageSize();
   const query = useMemo(
     () => ({
-      ...filters,
+      actor: filters.actor,
+      action: filters.action,
+      target: filters.target,
+      tenantId: uuidOrUndefined(filters.tenantId),
+      scope: oneOf(AUDIT_SCOPES, filters.scope),
       from: filters.from ? dayStartIso(filters.from) : undefined,
       to: filters.to ? dayEndIso(filters.to) : undefined,
     }),
@@ -70,7 +79,7 @@ function Audit() {
           <TextFilter label="Actor" value={filters.actor} onChange={(v) => setFilter({ actor: v })} />
           <TextFilter label="Action" value={filters.action} onChange={(v) => setFilter({ action: v })} placeholder="staff.invited" />
           <TextFilter label="Target" value={filters.target} onChange={(v) => setFilter({ target: v })} />
-          <TextFilter label="Merchant id" value={filters.tenantId} onChange={(v) => setFilter({ tenantId: v })} />
+          <TextFilter label="Merchant id (UUID)" value={filters.tenantId} onChange={(v) => setFilter({ tenantId: v })} />
           <SelectFilter
             label="Scope"
             value={filters.scope}

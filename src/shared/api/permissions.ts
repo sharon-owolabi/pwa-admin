@@ -1,20 +1,16 @@
-/**
- * PLACEHOLDER permission ids. The real ones arrive as `admin-permissions` in
- * `@solab-tech/fusion-shared` (Q8) and replace this file. The UI uses ids only
- * to decide what to render; the API enforces them, and nothing branches on a
- * role name.
- */
+// DUPLICATED FROM fusion-api/packages/shared/src/admin-permissions.ts (ADMIN_PERMISSION).
+// Replace with `admin-permissions` from @solab-tech/fusion-shared once it is published.
+//
+// The UI uses ids only to decide what to render; the API enforces them, and
+// nothing branches on a role name.
 export const ADMIN_PERMISSION = {
   OVERVIEW_VIEW: "admin:overview:view",
   TENANTS_VIEW: "admin:tenants:view",
   CONNECTORS_VIEW: "admin:connectors:view",
-  RUNS_VIEW: "admin:ingestion:view",
-  QUALITY_VIEW: "admin:quality:view",
   AUDIT_VIEW: "admin:audit:view",
   STAFF_VIEW: "admin:staff:view",
-  STAFF_INVITE: "admin:staff:invite",
-  STAFF_CHANGE_ROLE: "admin:staff:change_role",
-  STAFF_DEACTIVATE: "admin:staff:deactivate",
+  STAFF_MANAGE: "admin:staff:manage",
+  STAFF_APPROVE: "admin:staff:approve",
 } as const;
 
 export type AdminPermission = (typeof ADMIN_PERMISSION)[keyof typeof ADMIN_PERMISSION];

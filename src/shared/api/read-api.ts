@@ -1,28 +1,39 @@
 import type {
+  Approval,
+  ApprovalQuery,
   AuditEvent,
   AuditQuery,
-  ConnectorsResponse,
+  Connector,
   MappingQuery,
   MappingRun,
   Me,
   Overview,
   Page,
+  Paging,
   RunQuery,
+  StaffMember,
+  StaffQuery,
+  StaffRole,
+  StaffSession,
   SyncRun,
   TenantDetail,
   TenantQuery,
   TenantRow,
-} from "./contract.draft";
+} from "./contract";
 
 /** Every read the console makes. One implementation is the mock, one is HTTP. */
 export interface ReadApi {
   me(): Promise<Me>;
+  sessions(): Promise<StaffSession[]>;
   overview(): Promise<Overview>;
-  tenants(query: TenantQuery): Promise<Page<TenantRow>>;
+  tenants(query: TenantQuery & Paging): Promise<Page<TenantRow>>;
   tenant(id: string): Promise<TenantDetail>;
-  connectors(): Promise<ConnectorsResponse>;
-  runs(query: RunQuery): Promise<Page<SyncRun>>;
+  connectors(): Promise<Connector[]>;
+  runs(query: RunQuery & Paging): Promise<Page<SyncRun>>;
   run(id: string): Promise<SyncRun>;
-  mapping(query: MappingQuery): Promise<Page<MappingRun>>;
-  audit(query: AuditQuery): Promise<Page<AuditEvent>>;
+  mapping(query: MappingQuery & Paging): Promise<Page<MappingRun>>;
+  audit(query: AuditQuery & Paging): Promise<Page<AuditEvent>>;
+  staff(query: StaffQuery & Paging): Promise<Page<StaffMember>>;
+  roles(): Promise<StaffRole[]>;
+  approvals(query: ApprovalQuery & Paging): Promise<Page<Approval>>;
 }

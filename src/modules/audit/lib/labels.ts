@@ -1,4 +1,4 @@
-import type { AuditEvent } from "@/shared/api/contract.draft";
+import type { AuditEvent } from "@/shared/api/contract";
 import { titleCase } from "@/shared/lib/status";
 
 /** "staff.role_changed" → "Staff: role changed". Unknown actions still read. */
@@ -14,8 +14,13 @@ export function targetLabel(e: Pick<AuditEvent, "targetType" | "targetId">): str
   return [e.targetType, e.targetId].filter(Boolean).join(" ");
 }
 
-/** One sentence for the overview's highlights. `metadata` is never used (Q6). */
+/** The actor's label, or a stable fallback: the API can send no label (system actions). */
+export function actorName(e: Pick<AuditEvent, "actorLabel" | "actorId">): string {
+  return e.actorLabel ?? (e.actorId ? `Staff ${e.actorId.slice(0, 8)}` : "System");
+}
+
+/** One sentence for the overview's highlights. The API sends no metadata. */
 export function auditLine(e: AuditEvent): string {
   const target = targetLabel(e);
-  return `${e.actorLabel} · ${actionLabel(e.action)}${target ? ` · ${target}` : ""}`;
+  return `${actorName(e)} · ${actionLabel(e.action)}${target ? ` · ${target}` : ""}`;
 }

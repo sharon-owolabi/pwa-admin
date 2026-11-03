@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { NotAvailable } from "@/shared/api/contract";
 import { useOverview } from "@/shared/api/hooks";
 import { ADMIN_PERMISSION } from "@/shared/api/permissions";
 import { errorMessage } from "@/shared/api/errors";
@@ -16,6 +17,19 @@ import { formatCount } from "@/shared/lib/number";
 import { RequirePermission } from "@/modules/auth/components/require-permission";
 import { useCan } from "@/modules/auth/hooks/use-can";
 import { auditLine } from "@/modules/audit/lib/labels";
+
+const NOT_AVAILABLE_LABEL: Record<NotAvailable, string> = {
+  plans: "plans",
+  billing: "billing",
+  trials: "trials",
+  cost: "costs",
+  feature_flags: "feature flags",
+};
+
+function joinList(items: string[]): string {
+  if (items.length <= 1) return items.join("");
+  return `${items.slice(0, -1).join(", ")} or ${items[items.length - 1]}`;
+}
 
 function Card({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
@@ -58,7 +72,7 @@ function OverviewSkeleton() {
 function Overview() {
   const { data, isPending, isError, error, refetch } = useOverview();
   const canTenants = useCan(ADMIN_PERMISSION.TENANTS_VIEW);
-  const canRuns = useCan(ADMIN_PERMISSION.RUNS_VIEW);
+  const canRuns = useCan(ADMIN_PERMISSION.CONNECTORS_VIEW);
   const canAudit = useCan(ADMIN_PERMISSION.AUDIT_VIEW);
 
   if (isPending) return <OverviewSkeleton />;
@@ -188,10 +202,12 @@ function Overview() {
         </Card>
       ) : null}
 
-      <NoticePanel title="Not available yet">
-        Billing, plans, revenue, trials, coupons, costs and feature flags are not recorded by the platform yet, so
-        this console shows none of them rather than estimating.
-      </NoticePanel>
+      {data.notAvailable.length > 0 ? (
+        <NoticePanel title="Not available yet">
+          The platform does not record {joinList(data.notAvailable.map((k) => NOT_AVAILABLE_LABEL[k]))} yet, so this
+          console shows none of them rather than estimating.
+        </NoticePanel>
+      ) : null}
     </div>
   );
 }

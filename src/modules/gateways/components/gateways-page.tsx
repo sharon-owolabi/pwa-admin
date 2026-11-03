@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import type { Connector } from "@/shared/api/contract.draft";
+import type { Connector } from "@/shared/api/contract";
 import { errorMessage } from "@/shared/api/errors";
 import { useConnectors, usePageSize, useTenants } from "@/shared/api/hooks";
 import { ADMIN_PERMISSION } from "@/shared/api/permissions";
@@ -55,7 +55,7 @@ function Counts({ title, counts, hrefFor }: { title: string; counts: Record<stri
 }
 
 function GatewayCard({ c, selected }: { c: Connector; selected: boolean }) {
-  const canRuns = useCan(ADMIN_PERMISSION.RUNS_VIEW);
+  const canRuns = useCan(ADMIN_PERMISSION.CONNECTORS_VIEW);
   const name = gatewayLabel(c.gateway);
   return (
     <article
@@ -71,10 +71,10 @@ function GatewayCard({ c, selected }: { c: Connector; selected: boolean }) {
           {selected ? "Showing merchants" : "Show merchants"}
         </Link>
       </div>
-      <Counts title="Connections" counts={c.connectionsByStatus} hrefFor={(s) => `/merchants?gateway=${c.gateway}&connectionStatus=${s}`} />
+      <Counts title="Connections" counts={c.connections} hrefFor={(s) => `/merchants?gateway=${c.gateway}&connectionStatus=${s}`} />
       <Counts
-        title="Recent runs"
-        counts={c.runOutcomes}
+        title="Runs, last 24 hours"
+        counts={c.runs24h}
         hrefFor={canRuns ? (s) => `/sync-runs?gateway=${c.gateway}&status=${s}` : undefined}
       />
       <dl className="grid grid-cols-2 gap-x-4 gap-y-2 border-t border-line pt-4 text-sm">
@@ -87,7 +87,7 @@ function GatewayCard({ c, selected }: { c: Connector; selected: boolean }) {
         <dt className="text-muted">Circuit breaker</dt>
         <dd className="text-right"><Recorded value={c.circuitState ? titleCase(c.circuitState) : null} /></dd>
       </dl>
-      <DataUpTo value={c.lastSyncedAt} provider={name} />
+      <DataUpTo value={c.dataUpTo} provider={name} />
     </article>
   );
 }
@@ -152,14 +152,11 @@ function Gateways() {
     );
   }
   // Only the three launch gateways, in a fixed order.
-  const cards = LAUNCH_GATEWAYS.map((g) => data.items.find((c) => c.gateway === g)).filter(
+  const cards = LAUNCH_GATEWAYS.map((g) => data.find((c) => c.gateway === g)).filter(
     (c): c is Connector => c !== undefined,
   );
   return (
     <>
-      <div className="mb-4">
-        <DataUpTo value={data.dataUpTo} />
-      </div>
       <div className="grid gap-4 lg:grid-cols-3">
         {cards.map((c) => (
           <GatewayCard key={c.gateway} c={c} selected={c.gateway === selected} />
