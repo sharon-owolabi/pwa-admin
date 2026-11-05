@@ -1,5 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Hanken_Grotesk, Space_Mono } from "next/font/google";
+import { OfflineBanner } from "@/modules/pwa/components/offline-banner";
+import { ServiceWorker } from "@/modules/pwa/components/service-worker";
 import { THEME_BOOT_SCRIPT } from "@/modules/theme/theme-store";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -17,6 +19,17 @@ export const metadata: Metadata = {
   description: "Internal operations console for Fusion staff.",
   // An internal tool: never indexed. next.config.ts sends X-Robots-Tag too.
   robots: { index: false, follow: false },
+  manifest: "/manifest.webmanifest",
+  icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
+  appleWebApp: { capable: true, title: "Fusion Admin", statusBarStyle: "default" },
+};
+
+// The browser chrome follows the theme: --fx-bg, light and dark (a viewport tag cannot use var()).
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f3f0ef" }, // design-tokens-allow: meta cannot use var()
+    { media: "(prefers-color-scheme: dark)", color: "#15100e" }, // design-tokens-allow: meta cannot use var()
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -27,7 +40,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <OfflineBanner />
+          {children}
+          <ServiceWorker />
+        </Providers>
       </body>
     </html>
   );

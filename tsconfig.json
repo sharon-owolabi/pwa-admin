@@ -14,5 +14,6 @@
     "paths": { "@/*": ["./src/*"] }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  // The service worker is a different environment (no DOM): it has its own tsconfig.sw.json.
+  "exclude": ["node_modules", "src/sw.ts"]
 }

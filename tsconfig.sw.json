@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "webworker"],
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": ["src/sw.ts", "src/modules/pwa/lib/sw-update.ts"]
+}
