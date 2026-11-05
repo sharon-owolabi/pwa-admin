@@ -11,7 +11,7 @@ import { PageHeader } from "@/shared/components/page-header";
 import { LoadingRegion, Skeleton } from "@/shared/components/skeleton";
 import { StatusBadge } from "@/shared/components/status-badge";
 import { outlineButton, linkClass } from "@/shared/components/styles";
-import { TimeCell } from "@/shared/components/time-cell";
+import { NotRecorded, TimeCell } from "@/shared/components/time-cell";
 import { gatewayLabel, isLaunchGateway } from "@/shared/lib/gateways";
 import { formatCount } from "@/shared/lib/number";
 import { RequirePermission } from "@/modules/auth/components/require-permission";
@@ -114,7 +114,7 @@ function Overview() {
             </div>
             <div>
               <p className="text-4xl font-semibold tracking-tight text-ink tabular-nums">
-                {formatCount(data.projects.total)}
+                {data.projects ? formatCount(data.projects.total) : <NotRecorded />}
               </p>
               <p className="mt-1 text-sm text-muted">Checkout projects</p>
               <p className="text-xs text-muted">Active, not archived</p>

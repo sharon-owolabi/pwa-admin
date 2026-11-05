@@ -24,9 +24,11 @@ export interface ApiErrorBody {
 export type Me = Data<"get_me">;
 /**
  * INTERIM: the checkout-project fields are in the API's working tree but not in
- * the generated contract yet. These intersections add them; once
- * admin-contract.ts is regenerated they are redundant (and compatible), so
- * delete `Project`, `ProjectsOverview` and the two `&` below then.
+ * the generated contract yet. These intersections add them as OPTIONAL: an API
+ * that has not shipped them sends none, and the screens then say "Not recorded"
+ * rather than claim zero. Once admin-contract.ts is regenerated and the API is
+ * deployed, delete `Project`, `ProjectsOverview` and the two `&` below, and the
+ * `?? null` fallbacks in the overview and merchant profile.
  */
 export type SandboxSource = "fusion" | "merchant" | "simulated";
 export type KeyCounts = { active: number; revoked: number };
@@ -49,7 +51,7 @@ export interface Project {
   /** Counts only. Never key material. */
   keys: { sandbox: KeyCounts; live: KeyCounts };
 }
-type ProjectsOverview = { projects: { total: number } };
+type ProjectsOverview = { projects?: { total: number } };
 
 export type Overview = Data<"get_overview"> & ProjectsOverview;
 export type AuditEvent = Overview["recentAudit"][number];
@@ -57,7 +59,7 @@ export type NotAvailable = Overview["notAvailable"][number];
 
 export type TenantPage = Data<"get_tenants">;
 export type TenantRow = TenantPage["items"][number];
-export type TenantDetail = Data<"get_tenants_id"> & { projects: Project[] };
+export type TenantDetail = Data<"get_tenants_id"> & { projects?: Project[] };
 export type TenantConnection = TenantDetail["connections"][number];
 
 export type Connector = Data<"get_connectors">[number];
