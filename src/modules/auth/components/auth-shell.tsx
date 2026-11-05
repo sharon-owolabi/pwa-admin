@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Brand } from "@/shared/components/brand";
 import { EnvBadge } from "@/shared/components/env-badge";
+import { ConnectionStatus } from "@/modules/pwa/components/connection-status";
 import { ThemeToggle } from "@/modules/theme/theme-toggle";
 
 /** The frame for sign-in and invitation screens: brand, environment, one card. */
@@ -12,6 +13,7 @@ export function AuthShell({ title, children }: { title: string; children: ReactN
           <Brand size="lg" />
           <div className="flex items-center gap-2">
             <EnvBadge />
+            <ConnectionStatus />
             <ThemeToggle />
           </div>
         </div>

@@ -193,7 +193,12 @@ function Profile({ id }: { id: string }) {
       </Section>
 
       <Section title="Checkout projects">
-        <ProjectsSection projects={t.projects} />
+        {t.projects ? (
+          <ProjectsSection projects={t.projects} />
+        ) : (
+          // An API that does not report projects yet: not "none", which would be a claim.
+          <NoticePanel title="Not recorded">This API version does not report checkout projects yet.</NoticePanel>
+        )}
       </Section>
 
       <Section title="Transaction counts">

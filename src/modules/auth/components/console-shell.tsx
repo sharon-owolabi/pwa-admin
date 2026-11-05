@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { Brand } from "@/shared/components/brand";
 import { EnvBadge } from "@/shared/components/env-badge";
+import { ConnectionStatus } from "@/modules/pwa/components/connection-status";
 import { ThemeToggle } from "@/modules/theme/theme-toggle";
 import { can } from "@/shared/api/permissions";
 import { isActive, NAV } from "../lib/nav";
@@ -31,6 +32,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             <EnvBadge />
           </div>
           <div className="flex items-center gap-3">
+            <ConnectionStatus />
             <ThemeToggle />
             <AccountMenu />
           </div>

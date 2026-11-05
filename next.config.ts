@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import withSerwistInit from "@serwist/next";
 import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -41,11 +43,53 @@ const securityHeaders = [
     : []),
 ];
 
+/**
+ * The service worker (src/sw.ts → public/sw.js) precaches the app shell: every
+ * built JS, CSS and font file, plus these pages and images, so the app opens
+ * offline. `/` is not listed: it redirects, and precaching needs a 200.
+ * Off in development, where a worker caching half-built files only gets in the way.
+ */
+const revision = randomUUID();
+const withSerwist = withSerwistInit({
+  swSrc: "src/sw.ts",
+  swDest: "public/sw.js",
+  disable: isDev,
+  // modules/pwa registers the worker itself, so the "New version available" prompt can own the update.
+  register: false,
+  // Serwist's default reloads the page when the connection returns, which would throw away a screen mid-task.
+  reloadOnOnline: false,
+  // In-app link clicks are not document requests: cache those pages too, so every visited page opens offline.
+  cacheOnNavigation: true,
+  additionalPrecacheEntries: [
+    // Pages, so they open offline.
+    "/offline",
+    "/overview",
+    "/sign-in",
+    // The images every screen shows (public/ files are not in the build output, so they are listed).
+    "/brand/fusion-icon.png",
+    "/brand/fusion-wordmark-white.png",
+    "/icons/icon-192.png",
+  ].map((url) => ({ url, revision })),
+});
+
 const config: NextConfig = {
   reactStrictMode: true,
+  // Serwist is a webpack plugin (`next build --webpack`); this opts the dev server into Turbopack explicitly.
+  turbopack: {},
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      {
+        // The worker file must never be served stale, or a deploy could not reach people.
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+    ];
   },
 };
 
-export default config;
+export default withSerwist(config);
